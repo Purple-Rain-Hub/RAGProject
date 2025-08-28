@@ -202,14 +202,13 @@ const CHAMPIONS: Champion[] = [
 
 // Funzione semplice per mostrare tutti i campioni
 function printChampions(): void {
-  console.log('🎮 CAMPIONI DI LEAGUE OF LEGENDS');
   console.log('================================\n');
   
   CHAMPIONS.forEach((champion, index) => {
     console.log(`${index + 1}. ${champion.name} - ${champion.gender} - ${champion.species} (${champion.releaseYear})`);
   });
   
-  console.log(`\n📊 Totale campioni: ${CHAMPIONS.length}`);
+  console.log(`\n Totale campioni: ${CHAMPIONS.length}`);
 }
 
 // Esegui lo script
