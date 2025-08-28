@@ -1,21 +1,22 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
+    // Essential for module resolution
+    "moduleResolution": "bundler", // or "nodenext" | "node16" | "node"
+    
+    // Required for Web Stream API support
+"lib": ["esnext", "dom", "dom.iterable"],    
+    // Recommended for better compatibility
+    "target": "es2020",
+    "module": "esnext",
     // File Layout
     // "rootDir": "./src",
     // "outDir": "./dist",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
-    "target": "es2020",
-    
-    // Essential for module resolution
-    "moduleResolution": "bundler", // or "nodenext" | "node16" | "node"
+
     "types": [],
-    
-    // Required for Web Stream API support
-    "lib": ["DOM.AsyncIterable"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -43,7 +44,6 @@
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
   }
