@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@llamaindex/google": "^0.3.20",
+    "@llamaindex/workflow": "^1.1.22",
+    "llamaindex": "^0.11.28"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  }
+}
