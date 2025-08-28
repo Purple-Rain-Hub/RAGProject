@@ -119,3 +119,4 @@ temp/
 *.weights
 embeddings/
 vector_store/
+lolChampsEmbeddings
