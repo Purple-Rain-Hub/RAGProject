@@ -1,5 +1,6 @@
 import "dotenv/config";
 import fs from "node:fs/promises";
+import path from "node:path";
 
 import { gemini, GeminiEmbedding, GEMINI_MODEL } from "@llamaindex/google";
 import {
@@ -18,12 +19,12 @@ Settings.embedModel = new GeminiEmbedding();
 
 async function main() {
     // Load essay from abramov.txt in Node
-  const path = "node_modules/llamaindex/examples/abramov.txt";
+  const filePath = path.join(__dirname, "..", "node_modules", "llamaindex", "examples", "abramov.txt");
 
-  const essay = await fs.readFile(path, "utf-8");
+  const essay = await fs.readFile(filePath, "utf-8");
 
   // Create Document object with essay
-  const document = new Document({ text: essay, id_: path });
+  const document = new Document({ text: essay, id_: filePath });
 
   // Split text and create embeddings. Store them in a VectorStoreIndex
   const index = await VectorStoreIndex.fromDocuments([document]);
