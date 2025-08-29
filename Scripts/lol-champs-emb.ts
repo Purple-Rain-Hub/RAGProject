@@ -9,6 +9,7 @@ import {
   type NodeWithScore,
   Settings,
   VectorStoreIndex,
+  storageContextFromDefaults,
 } from "llamaindex";
 
 import { CHAMPIONS, type Champion } from "./lol-champs";
@@ -42,25 +43,17 @@ async function lolChampsEmb() {
 
     console.log(`Processando ${documents.length} campioni...`)
 
+    // Crea il storage context per il salvataggio
+    const storageContext = await storageContextFromDefaults({
+        persistDir: "./lolChampsEmbeddings",
+    });
+
     // Crea l'indice vettoriale con gli embeddings
-    const index = await VectorStoreIndex.fromDocuments(documents)
-    const indexPath = index.storageContext.indexStore.persist("lolChampsEmbeddings")
-
-    console.log(`Indice salvato in: ${indexPath}`);
-  
-    const queryEngine = index.asQueryEngine({similarityTopK: 15});
-    const { message, sourceNodes } = await queryEngine.query({query: "Lux"});
-
-    console.log(message.content);
-
-    if(sourceNodes){
-      sourceNodes.forEach((source: NodeWithScore, index: number)=>{
-        console.log(
-      `\n${index}: Score: ${source.score} - ${source.node.getContent(MetadataMode.NONE).substring(0, 50)}...\n`,
-        );
-      });
-    }
+    const index = await VectorStoreIndex.fromDocuments(documents, {
+        storageContext,
+    });
     
+    console.log("Indice vettoriale salvato in ./lolChampsEmbeddings")
     
     return index;
 }
