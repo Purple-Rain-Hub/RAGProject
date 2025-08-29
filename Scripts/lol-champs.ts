@@ -217,7 +217,7 @@ function printChampions(): void {
 }
 
 // Esegui lo script
-printChampions();
+//printChampions();
 
 // Esporta i dati per uso esterno
 export { CHAMPIONS, Champion };

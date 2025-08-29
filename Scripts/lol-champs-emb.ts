@@ -20,7 +20,7 @@ Settings.llm = gemini({
 });
 Settings.embedModel = new GeminiEmbedding();
 
-async function lolChampsEmb() {
+export async function lolChampsEmb() {
     const documents = CHAMPIONS.map((champion) => {
         const text = `${champion.name} ${champion.gender} ${champion.species} ${champion.releaseYear} ${champion.region} ${champion.primaryRole} ${champion.secondaryRole || ''} ${champion.damageType}`;
         
@@ -58,4 +58,4 @@ async function lolChampsEmb() {
     return index;
 }
 
-lolChampsEmb().catch(console.error);
+//lolChampsEmb().catch(console.error);

@@ -7,6 +7,9 @@ import {
     type NodeWithScore,
     MetadataMode
 } from "llamaindex";
+import fs from "fs";
+import path from "path";
+import { lolChampsEmb } from "./lol-champs-emb";
 
 // Configurazione LLM e modello di embedding
 Settings.llm = gemini({
@@ -20,9 +23,19 @@ export async function loadIndex() {
         console.log("Caricando l'indice vettoriale dei campioni di LoL...");
 
         // Caricare l'indice salvato dal file lol-champs-emb
-        const storageContext = await storageContextFromDefaults({
-            persistDir: "./lolChampsEmbeddings",
-        });
+        const persistDir = "./lolChampsEmbeddings";
+
+        //Controllo che gli embeddings esistano
+        const requiredFiles = ["doc_store.json", "index_store.json", "vector_store.json"];
+        const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(persistDir, file)));
+
+        if (missingFiles.length > 0) {
+            console.log(`File mancanti nella cartella ${persistDir}: ${missingFiles.join(", ")}\n`);
+            await lolChampsEmb();
+            console.log("Embeddings generati\n")
+        }
+
+        const storageContext = await storageContextFromDefaults({ persistDir });
 
         const index = await VectorStoreIndex.init({
             storageContext,
@@ -35,7 +48,6 @@ export async function loadIndex() {
     } catch (error) {
         console.error("Errore durante il caricamento dell'indice:");
         console.error(error);
-        console.log("\n💡 Assicurati di aver prima eseguito lo script lol-champs-emb.ts per creare l'indice vettoriale.");
     }
 }
 
@@ -47,6 +59,8 @@ export async function rankingFromQuery() {
             throw new Error("Index non definito");
         }
 
+        console.log("Calcolo ranking...");
+        
         // Creare il query engine
         const totChamps = 159;
         const queryChamp = "Lux"
@@ -60,7 +74,7 @@ export async function rankingFromQuery() {
         }
 
         //Calcolo il ranking del target dalla query
-        const targetName = "Lissandra"
+        const targetName = "LeBlanc"
         let i = 0
         for (const source of sourceNodes) {
             const metadataName = source.node.metadata.name;
