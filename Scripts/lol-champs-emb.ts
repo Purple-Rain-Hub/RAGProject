@@ -11,7 +11,7 @@ import {
   VectorStoreIndex,
 } from "llamaindex";
 
-import { CHAMPIONS, type Champion } from "./lol-champs.js";
+import { CHAMPIONS, type Champion } from "./lol-champs";
 
 Settings.llm = gemini({
   apiKey: process.env.GOOGLE_API_KEY!,
@@ -21,16 +21,21 @@ Settings.embedModel = new GeminiEmbedding();
 
 async function lolChampsEmb() {
     const documents = CHAMPIONS.map((champion) => {
-        const text = `${champion.name} è un campione ${champion.gender} di specie ${champion.species}, rilasciato nel ${champion.releaseYear}`;
+        const text = `${champion.name} ${champion.gender} ${champion.species} ${champion.releaseYear} ${champion.region} ${champion.primaryRole} ${champion.secondaryRole || ''} ${champion.damageType}`;
         
         return new Document({
             text,
             // Metadata per la ricerca, l'ia non ne farà uso ed embedding
             metadata: {
                 name: champion.name,
+                title: champion.title,
                 gender: champion.gender,
                 species: champion.species,
                 releaseYear: champion.releaseYear,
+                region: champion.region,
+                primaryRole: champion.primaryRole,
+                secondaryRole: champion.secondaryRole,
+                damageType: champion.damageType,
             }
         })
     })
@@ -43,7 +48,7 @@ async function lolChampsEmb() {
 
     console.log(`Indice salvato in: ${indexPath}`);
   
-    const queryEngine = index.asQueryEngine({similarityTopK: 5});
+    const queryEngine = index.asQueryEngine({similarityTopK: 15});
     const { message, sourceNodes } = await queryEngine.query({query: "Lux"});
 
     console.log(message.content);
