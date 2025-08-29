@@ -39,11 +39,24 @@ async function lolChampsEmb() {
 
     // Crea l'indice vettoriale con gli embeddings
     const index = await VectorStoreIndex.fromDocuments(documents)
-    
     const indexPath = index.storageContext.indexStore.persist("lolChampsEmbeddings")
 
     console.log(`Indice salvato in: ${indexPath}`);
   
+    const queryEngine = index.asQueryEngine({similarityTopK: 5});
+    const { message, sourceNodes } = await queryEngine.query({query: "Lux"});
+
+    console.log(message.content);
+
+    if(sourceNodes){
+      sourceNodes.forEach((source: NodeWithScore, index: number)=>{
+        console.log(
+      `\n${index}: Score: ${source.score} - ${source.node.getContent(MetadataMode.NONE).substring(0, 50)}...\n`,
+        );
+      });
+    }
+    
+    
     return index;
 }
 
