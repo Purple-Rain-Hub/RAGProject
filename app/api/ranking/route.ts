@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         // Get champion names directly from the imported data
         const championNames = CHAMPIONS.map(champion => champion.name);
         
-        if(!championNames.includes(targetInput)) {
+        if(!championNames.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
             return Response.json({ error: "Target champion not found" }, { status: 400 });
         }
 

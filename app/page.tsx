@@ -36,7 +36,7 @@ export default function Page() {
 
   // Filter champions based on input
   useEffect(() => {
-    if (targetInput.trim() === '') {
+    if (targetInput.trim() === '' || champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
       setFilteredChampions([]);
       setShowSuggestions(false);
       return;
@@ -56,7 +56,7 @@ export default function Page() {
 
   const handleSubmit = async () => {
     // Validate that the input is a valid champion
-    if (!champions.includes(targetInput)) {
+    if (!champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
       setError("Per favore inserisci un nome di campione valido");
       return;
     }
@@ -111,7 +111,7 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       {/* Header with themed styling */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden h-screen">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
@@ -121,7 +121,7 @@ export default function Page() {
           }}></div>
         </div>
         
-        <div className="relative z-10 p-8">
+        <div className="relative z-10 h-full flex flex-col justify-center p-4 md:p-8">
           {/* Game Title */}
           <div className="text-center mb-8">
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent float-animation">
@@ -187,7 +187,7 @@ export default function Page() {
                 )}
 
                 {/* Invalid champion warning */}
-                {targetInput && !champions.includes(targetInput) && !showSuggestions && (
+                {targetInput && !champions.some(c=> c.toLowerCase() === targetInput.toLowerCase()) && !showSuggestions && (
                   <div className="mt-2 text-sm text-red-400 flex items-center">
                     <span className="mr-2">⚠️</span>
                     Campione non trovato. Inserisci un nome valido.
@@ -197,7 +197,7 @@ export default function Page() {
 
               <button
                 onClick={handleSubmit}
-                disabled={loading || loadingChampions || !champions.includes(targetInput)}
+                disabled={loading || loadingChampions || !champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())}
                 className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? (
