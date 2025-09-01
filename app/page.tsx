@@ -46,7 +46,7 @@ export default function Page() {
     }
 
     const filtered = champions.filter(champion =>
-      champion.toLowerCase().startsWith(targetInput.toLowerCase())
+      champion.toLowerCase().startsWith(targetInput.toLowerCase()) && !attempts.some(a=> a.targetChamp === champion) && result?.targetChamp != champion
     );
     setFilteredChampions(filtered);
     setShowSuggestions(filtered.length > 0);
