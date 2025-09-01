@@ -160,7 +160,7 @@ export default function Page() {
 
           {/* Game Stats */}
           <div className="flex justify-center mb-8">
-            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-yellow-500/30">
+            <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/30">
               <div className="text-center">
                 <p className="text-yellow-400 font-semibold">Tentativi: <span className="text-white">{attemptsCounter}</span></p>
                 <p className="text-gray-400 text-sm">Tentativi illimitati</p>
@@ -170,7 +170,7 @@ export default function Page() {
 
           {/* Game Interface */}
           <div className="max-w-2xl mx-auto">
-            <div className="bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-blue-500/30 shadow-2xl">
+            <div className="bg-black/40 rounded-lg p-6 border border-blue-500/30 shadow-2xl">
               <label htmlFor="target" className="block text-lg font-semibold text-blue-300 mb-3">
                 💫 Inserisci il nome del campione:
               </label>
@@ -182,7 +182,7 @@ export default function Page() {
                   onChange={(e) => setTargetInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   onFocus={() => targetInput && setShowSuggestions(true)}
-                  placeholder="Es: Lux, Yasuo, Ahri..."
+                  placeholder="Es: Vex, Yasuo, Ahri..."
                   className="w-full rounded-lg border-2 border-blue-500/50 bg-black/50 px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all duration-200"
                   disabled={loadingChampions}
                   autoComplete="off"
@@ -197,7 +197,7 @@ export default function Page() {
 
                 {/* Champion suggestions dropdown */}
                 {showSuggestions && filteredChampions.length > 0 && (
-                  <div className="absolute z-20 w-full mt-2 bg-black/90 backdrop-blur-sm border border-blue-500/50 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
+                  <div className="absolute z-20 w-full mt-2 bg-black/90 border border-blue-500/50 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
                     {filteredChampions.map((champion, index) => (
                       <div
                         key={index}
@@ -243,7 +243,7 @@ export default function Page() {
             </div>
 
             {error && (
-              <div className="mt-6 bg-red-900/40 backdrop-blur-sm rounded-lg p-6 border border-red-500/30">
+              <div className="mt-6 bg-red-900/40 rounded-lg p-6 border border-red-500/30">
                 <h3 className="text-lg font-semibold text-red-400 mb-2 flex items-center">
                   <span className="mr-2">❌</span>
                   Errore
@@ -254,7 +254,7 @@ export default function Page() {
 
             {/* Results Section */}
             {loading && (
-              <div className="mt-6 bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-blue-500/30">
+              <div className="mt-6 bg-black/40 rounded-lg p-6 border border-blue-500/30">
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mr-3"></div>
                   <h3 className="text-lg font-semibold text-blue-300">Analizzando il campione...</h3>
@@ -264,7 +264,7 @@ export default function Page() {
             )}
 
             {result && (
-              <div className="mt-6 bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-yellow-500/30">
+              <div className="mt-6 bg-black/40 rounded-lg p-6 border border-yellow-500/30">
                 <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center">
                   <span className="mr-2">🎯</span>
                   Risultato del Tentativo
@@ -297,7 +297,7 @@ export default function Page() {
                 </h3>
                 <div className="space-y-3">
                   {attempts.map((attempt, index) => (
-                    <div key={index} className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20 hover:border-blue-500/40 transition-colors duration-200">
+                    <div key={index} className="bg-black/30 rounded-lg p-4 border border-blue-500/20 hover:border-blue-500/40 transition-colors duration-200">
                       <div className="flex items-center justify-between">
                         <span className="text-white font-semibold">{attempt.targetChamp}</span>
                         <span className={`text-sm font-bold px-3 py-1 rounded ${getDistanceColor(attempt.ranking)}`}>
