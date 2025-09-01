@@ -1,4 +1,5 @@
 import { rankingFromQuery } from "../../../Scripts/lol-champs-query";
+import { CHAMPIONS } from "../../../Scripts/lol-champs";
 
 export async function GET(request: Request) {
     try {
@@ -7,6 +8,13 @@ export async function GET(request: Request) {
         
         if (!targetInput) {
             return Response.json({ error: "targetInput parameter is required" }, { status: 400 });
+        }
+        
+        // Get champion names directly from the imported data
+        const championNames = CHAMPIONS.map(champion => champion.name);
+        
+        if(!championNames.includes(targetInput)) {
+            return Response.json({ error: "Target champion not found" }, { status: 400 });
         }
 
         const ranking = await rankingFromQuery("Lux", targetInput);
