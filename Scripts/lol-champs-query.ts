@@ -51,7 +51,7 @@ export async function loadIndex() {
     }
 }
 
-export async function rankingFromQuery() {
+export async function rankingFromQuery(queryChamp: string, targetChamp: string) {
     try {
         //Carico indice attraverso la funzione loadIndex
         const index = await loadIndex();
@@ -63,7 +63,6 @@ export async function rankingFromQuery() {
         
         // Creare il query engine
         const totChamps = 159;
-        const queryChamp = "Lux"
         const queryEngine = index.asQueryEngine({ similarityTopK: totChamps });
         const { message, sourceNodes } = await queryEngine.query({ query: queryChamp });
 
@@ -74,12 +73,11 @@ export async function rankingFromQuery() {
         }
 
         //Calcolo il ranking del target dalla query
-        const targetName = "LeBlanc"
         let i = 0
         for (const source of sourceNodes) {
             const metadataName = source.node.metadata.name;
-            if (metadataName === targetName) {
-                console.log(`\n Distanza ${targetName} da ${queryChamp}: ${i}`);
+            if (metadataName === targetChamp) {
+                console.log(`\n Distanza ${targetChamp} da ${queryChamp}: ${i}`);
                 break;
             }
             i++
@@ -91,4 +89,4 @@ export async function rankingFromQuery() {
 
 }
 
-rankingFromQuery().catch(console.error);
+rankingFromQuery("Lux", "LeBlanc").catch(console.error);

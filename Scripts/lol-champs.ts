@@ -220,4 +220,5 @@ function printChampions(): void {
 //printChampions();
 
 // Esporta i dati per uso esterno
-export { CHAMPIONS, Champion };
+export { CHAMPIONS };
+export type { Champion };
