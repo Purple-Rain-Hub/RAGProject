@@ -64,7 +64,7 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
         // Creare il query engine
         const totChamps = 159;
         const queryEngine = index.asQueryEngine({ similarityTopK: totChamps });
-        const { message, sourceNodes } = await queryEngine.query({ query: queryChamp });
+        const { message, sourceNodes } = await queryEngine.query({ query: queryChamp.toLowerCase() });
 
         //console.log(message.content);
 
@@ -76,12 +76,19 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
         let i = 0
         for (const source of sourceNodes) {
             const metadataName = source.node.metadata.name;
-            if (metadataName === targetChamp) {
-                console.log(`\n Distanza ${targetChamp} da ${queryChamp}: ${i}`);
-                break;
+            if (metadataName.toLowerCase() === targetChamp.toLowerCase()) {
+                const ranking = {
+                    ranking: i,
+                    queryChamp: queryChamp,
+                    targetChamp: targetChamp
+                };
+                return ranking;
             }
             i++
         };
+
+        return undefined;
+
     } catch (error) {
         console.error("Errore durante il ranking della query: ");
         console.error(error);
@@ -89,4 +96,4 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
 
 }
 
-rankingFromQuery("Lux", "LeBlanc").catch(console.error);
+//rankingFromQuery("Lux", "LeBlanc").catch(console.error);
