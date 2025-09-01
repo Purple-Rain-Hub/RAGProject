@@ -13,6 +13,8 @@ export default function Page() {
   const [loadingChampions, setLoadingChampions] = useState(true);
   const [attemptsCounter, setAttemptsCounter] = useState(0);
   const [attempts, setAttempts] = useState<{ ranking: number, queryChamp: string, targetChamp: string }[]>([])
+  const [invalidAttempt, setInvalidAttempt] = useState(false)
+  const [victory, setVictory] = useState(false);
 
   // Load champions on component mount
   useEffect(() => {
@@ -56,17 +58,27 @@ export default function Page() {
   };
 
   const handleSubmit = async () => {
+    if(victory){
+      return
+    }
+
     // Validate that the input is a valid champion
     if (!champions.some(c => c.toLowerCase() === targetInput.toLowerCase())) {
       setError("Per favore inserisci un nome di campione valido");
       return;
     }
 
+    if (result?.targetChamp.toLowerCase() === targetInput.toLowerCase() || attempts.some(a => a.targetChamp.toLowerCase() === targetInput.toLowerCase())) {
+      setInvalidAttempt(true);
+      return
+    }
+
     try {
       setLoading(true);
       setError("");
+      setInvalidAttempt(false);
 
-      if(result){
+      if (result) {
         setAttempts([result, ...attempts])
       }
       setResult(undefined);
@@ -79,6 +91,12 @@ export default function Page() {
       const data = await response.json();
       console.log(data);
       setResult(data.ranking);
+
+      if(data.ranking.ranking === 0){
+        setVictory(true)
+      }
+
+      setTargetInput("");
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -199,11 +217,19 @@ export default function Page() {
                     Campione non trovato. Inserisci un nome valido.
                   </div>
                 )}
+
+                {/* Invalid attempt warning */}
+                {invalidAttempt && (
+                  <div className="mt-2 text-sm text-red-400 flex items-center">
+                    <span className="mr-2">⚠️</span>
+                    Hai già provato questo campione.
+                  </div>
+                )}
               </div>
 
               <button
                 onClick={handleSubmit}
-                disabled={loading || loadingChampions || !champions.some(c => c.toLowerCase() === targetInput.toLowerCase())}
+                disabled={loading || loadingChampions || !champions.some(c => c.toLowerCase() === targetInput.toLowerCase()) || victory}
                 className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? (
@@ -215,6 +241,16 @@ export default function Page() {
                 )}
               </button>
             </div>
+
+            {error && (
+              <div className="mt-6 bg-red-900/40 backdrop-blur-sm rounded-lg p-6 border border-red-500/30">
+                <h3 className="text-lg font-semibold text-red-400 mb-2 flex items-center">
+                  <span className="mr-2">❌</span>
+                  Errore
+                </h3>
+                <p className="text-red-300">{error}</p>
+              </div>
+            )}
 
             {/* Results Section */}
             {loading && (
@@ -274,15 +310,6 @@ export default function Page() {
               </div>
             )}
 
-            {error && (
-              <div className="mt-6 bg-red-900/40 backdrop-blur-sm rounded-lg p-6 border border-red-500/30">
-                <h3 className="text-lg font-semibold text-red-400 mb-2 flex items-center">
-                  <span className="mr-2">❌</span>
-                  Errore
-                </h3>
-                <p className="text-red-300">{error}</p>
-              </div>
-            )}
           </div>
 
           {/* Footer */}
