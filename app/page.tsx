@@ -11,7 +11,8 @@ export default function Page() {
   const [filteredChampions, setFilteredChampions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingChampions, setLoadingChampions] = useState(true);
-  const [attempts, setAttempts] = useState(0);
+  const [attemptsCounter, setAttemptsCounter] = useState(0);
+  const [attempts, setAttempts] = useState<{ ranking: number, queryChamp: string, targetChamp: string }[]>([])
 
   // Load champions on component mount
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function Page() {
 
   // Filter champions based on input
   useEffect(() => {
-    if (targetInput.trim() === '' || champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
+    if (targetInput.trim() === '' || champions.some(c => c.toLowerCase() === targetInput.toLowerCase())) {
       setFilteredChampions([]);
       setShowSuggestions(false);
       return;
@@ -56,16 +57,21 @@ export default function Page() {
 
   const handleSubmit = async () => {
     // Validate that the input is a valid champion
-    if (!champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
+    if (!champions.some(c => c.toLowerCase() === targetInput.toLowerCase())) {
       setError("Per favore inserisci un nome di campione valido");
       return;
     }
 
     try {
       setLoading(true);
-      setResult(undefined);
       setError("");
-      setAttempts(prev => prev + 1);
+
+      if(result){
+        setAttempts([result, ...attempts])
+      }
+      setResult(undefined);
+
+      setAttemptsCounter(prev => prev + 1);
       const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`);
       if (!response.ok) {
         throw new Error("Errore nella fetch del ranking");
@@ -111,7 +117,7 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       {/* Header with themed styling */}
-      <div className="relative overflow-hidden h-screen">
+      <div className="relative overflow-y-auto min-h-screen">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
@@ -120,8 +126,8 @@ export default function Page() {
             backgroundSize: '20px 20px'
           }}></div>
         </div>
-        
-        <div className="relative z-10 h-full flex flex-col justify-center p-4 md:p-8">
+
+        <div className="relative z-10 min-h-screen flex flex-col justify-center p-4 md:p-8">
           {/* Game Title */}
           <div className="text-center mb-8">
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent float-animation">
@@ -129,7 +135,7 @@ export default function Page() {
             </h1>
             <div className="w-32 h-1 bg-gradient-to-r from-yellow-400 to-red-500 mx-auto mb-4"></div>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Indovina il campione nascosto! Ogni tentativo ti rivelerà quanto sei vicino alla risposta corretta, 
+              Indovina il campione nascosto! Ogni tentativo ti rivelerà quanto sei vicino alla risposta corretta,
               ma dovrai usare le tue conoscenze sui campioni di League of Legends per scoprire chi si nasconde nell'ombra.
             </p>
           </div>
@@ -138,7 +144,7 @@ export default function Page() {
           <div className="flex justify-center mb-8">
             <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-yellow-500/30">
               <div className="text-center">
-                <p className="text-yellow-400 font-semibold">Tentativi: <span className="text-white">{attempts}</span></p>
+                <p className="text-yellow-400 font-semibold">Tentativi: <span className="text-white">{attemptsCounter}</span></p>
                 <p className="text-gray-400 text-sm">Tentativi illimitati</p>
               </div>
             </div>
@@ -163,7 +169,7 @@ export default function Page() {
                   disabled={loadingChampions}
                   autoComplete="off"
                 />
-                
+
                 {/* Loading indicator for champions */}
                 {loadingChampions && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-blue-300">
@@ -187,7 +193,7 @@ export default function Page() {
                 )}
 
                 {/* Invalid champion warning */}
-                {targetInput && !champions.some(c=> c.toLowerCase() === targetInput.toLowerCase()) && !showSuggestions && (
+                {targetInput && !champions.some(c => c.toLowerCase() === targetInput.toLowerCase()) && !showSuggestions && (
                   <div className="mt-2 text-sm text-red-400 flex items-center">
                     <span className="mr-2">⚠️</span>
                     Campione non trovato. Inserisci un nome valido.
@@ -197,7 +203,7 @@ export default function Page() {
 
               <button
                 onClick={handleSubmit}
-                disabled={loading || loadingChampions || !champions.some(c=> c.toLowerCase() === targetInput.toLowerCase())}
+                disabled={loading || loadingChampions || !champions.some(c => c.toLowerCase() === targetInput.toLowerCase())}
                 className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? (
@@ -220,7 +226,7 @@ export default function Page() {
                 <p className="text-gray-400 text-center mt-2">Calcolando la distanza dal campione misterioso...</p>
               </div>
             )}
-            
+
             {result && (
               <div className="mt-6 bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-yellow-500/30">
                 <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center">
@@ -246,7 +252,28 @@ export default function Page() {
                 </div>
               </div>
             )}
-            
+
+            {attempts && attempts.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center">
+                  <span className="mr-2">📋</span>
+                  Tentativi Precedenti
+                </h3>
+                <div className="space-y-3">
+                  {attempts.map((attempt, index) => (
+                    <div key={index} className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20 hover:border-blue-500/40 transition-colors duration-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-semibold">{attempt.targetChamp}</span>
+                        <span className={`text-sm font-bold px-3 py-1 rounded ${getDistanceColor(attempt.ranking)}`}>
+                          {attempt.ranking}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="mt-6 bg-red-900/40 backdrop-blur-sm rounded-lg p-6 border border-red-500/30">
                 <h3 className="text-lg font-semibold text-red-400 mb-2 flex items-center">
@@ -261,7 +288,7 @@ export default function Page() {
           {/* Footer */}
           <div className="text-center mt-12 text-gray-400">
             <p className="text-sm">
-              💡 Suggerimento: Usa le informazioni sui campioni come razza, sesso, tipo di danno, 
+              💡 Suggerimento: Usa le informazioni sui campioni come razza, sesso, tipo di danno,
               ruolo e regione per indovinare il campione misterioso!
             </p>
           </div>
