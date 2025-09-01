@@ -8,7 +8,7 @@ export async function GET(request: Request) {
         if (!targetInput) {
             return Response.json({ error: "targetInput parameter is required" }, { status: 400 });
         }
-        
+
         const ranking = await rankingFromQuery("Lux", targetInput);
         if (!ranking) {
             throw new Error("Ranking not found");

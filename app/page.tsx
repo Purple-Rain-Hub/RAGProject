@@ -64,7 +64,7 @@ export default function Page() {
       setLoading(true);
       setResult(undefined);
       setError("");
-      const response = await fetch(`/api/rankingAPI?targetInput=${encodeURIComponent(targetInput)}`);
+      const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`);
       if (!response.ok) {
         throw new Error("Errore nella fetch del ranking");
       }
@@ -111,6 +111,7 @@ export default function Page() {
           placeholder="Inserisci il nome del campione..."
           className="w-full max-w-md rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={loadingChampions}
+          autoComplete="off"
         />
         
         {/* Loading indicator for champions */}
