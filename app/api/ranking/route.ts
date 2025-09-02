@@ -25,6 +25,8 @@ export async function GET(request: Request) {
         }
         const dailyIndex = hash % CHAMPION_NAMES.length;
         const dailyQueryChampion = CHAMPION_NAMES[dailyIndex];
+        console.log(dailyQueryChampion);
+        
 
         const ranking = await rankingFromQuery(dailyQueryChampion, targetInput);
         if (!ranking) {

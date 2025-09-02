@@ -79,7 +79,7 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
             if (metadataName.toLowerCase() === targetChamp.toLowerCase()) {
                 const ranking = {
                     ranking: i,
-                    targetChamp: targetChamp
+                    targetChamp: metadataName
                 };
                 return ranking;
             }

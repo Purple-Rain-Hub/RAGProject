@@ -90,7 +90,6 @@ export default function Page() {
         throw new Error("Errore nella fetch del ranking");
       }
       const data = await response.json();
-      console.log(data);
       setResult(data.ranking);
 
       if(data.ranking.ranking === 0){
