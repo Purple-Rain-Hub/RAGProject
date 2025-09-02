@@ -1,13 +1,12 @@
 import { CHAMPIONS } from "../../../Scripts/lol-champs";
 
+const CHAMPION_NAMES = CHAMPIONS.map(champion => champion.name);
+
 export async function GET() {
     try {
-        // Return only the names of champions for the frontend
-        const championNames = CHAMPIONS.map(champion => champion.name);
-        
         return Response.json({ 
-            champions: championNames,
-            total: championNames.length 
+            champions: CHAMPION_NAMES,
+            total: CHAMPION_NAMES.length 
         });
         
     } catch (error) {

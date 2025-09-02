@@ -1,6 +1,8 @@
 import { rankingFromQuery } from "../../../Scripts/lol-champs-query";
 import { CHAMPIONS } from "../../../Scripts/lol-champs";
 
+const CHAMPION_NAMES = CHAMPIONS.map(champion => champion.name);
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -10,10 +12,7 @@ export async function GET(request: Request) {
             return Response.json({ error: "targetInput parameter is required" }, { status: 400 });
         }
         
-        // Get champion names directly from the imported data
-        const championNames = CHAMPIONS.map(champion => champion.name);
-        
-        if(!championNames.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
+        if(!CHAMPION_NAMES.some(c=> c.toLowerCase() === targetInput.toLowerCase())) {
             return Response.json({ error: "Target champion not found" }, { status: 400 });
         }
 
@@ -24,8 +23,8 @@ export async function GET(request: Request) {
         for (let i = 0; i < seedString.length; i++) {
             hash = (hash * 31 + seedString.charCodeAt(i)) >>> 0;
         }
-        const dailyIndex = hash % championNames.length;
-        const dailyQueryChampion = championNames[dailyIndex];
+        const dailyIndex = hash % CHAMPION_NAMES.length;
+        const dailyQueryChampion = CHAMPION_NAMES[dailyIndex];
 
         const ranking = await rankingFromQuery(dailyQueryChampion, targetInput);
         if (!ranking) {
