@@ -9,6 +9,7 @@ type AttemptsListProps = {
 
 export default function AttemptsList({ attempts, getDistanceColor }: AttemptsListProps) {
   if (!attempts || attempts.length === 0) return null;
+  const sortedAttempts = [...attempts].sort((a, b) => a.ranking - b.ranking); //attempts scritto cosi per non modificare l'ordine dell'array originale
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center">
@@ -16,7 +17,7 @@ export default function AttemptsList({ attempts, getDistanceColor }: AttemptsLis
         Tentativi Precedenti
       </h3>
       <div className="space-y-3">
-        {attempts.map((attempt, index) => (
+        {sortedAttempts.map((attempt, index) => (
           <div key={index} className="bg-black/30 rounded-lg p-4 border border-blue-500/20 hover:border-blue-500/40 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <span className="text-white font-semibold">{attempt.targetChamp}</span>
