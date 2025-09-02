@@ -18,6 +18,7 @@ type UseChampionSuggestionsReturn = {
   setShowSuggestions: React.Dispatch<React.SetStateAction<boolean>>;
   setHighlightedSuggestion: React.Dispatch<React.SetStateAction<number>>;
   handleChampionSelect: (championName: string) => void;
+  keyDownFunc: (e: React.KeyboardEvent) => boolean;
 };
 
 export function useChampionSuggestions(
@@ -68,6 +69,45 @@ export function useChampionSuggestions(
     setHighlightedSuggestion(-1);
   };
 
+  const keyDownFunc = (e: React.KeyboardEvent) =>{
+    if (e.key === 'ArrowDown') {
+      if (showSuggestions && filteredChampions.length > 0) {
+        e.preventDefault();
+        const next = highlightedSuggestion < filteredChampions.length - 1 ? highlightedSuggestion + 1 : 0;
+        setHighlightedSuggestion(next);
+      }
+      return false;
+    }
+
+    if (e.key === 'ArrowUp') {
+      if (showSuggestions && filteredChampions.length > 0) {
+        e.preventDefault();
+        const next = highlightedSuggestion > 0 ? highlightedSuggestion - 1 : filteredChampions.length - 1;
+        setHighlightedSuggestion(next);
+      }
+      return false;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredChampions.length > 0 && showSuggestions) {
+        const suggestionToSelect = highlightedSuggestion >= 0 ? highlightedSuggestion : 0;
+        handleChampionSelect(filteredChampions[suggestionToSelect]);
+      } else {
+        return true
+      }
+      return false;
+    }
+
+    if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setHighlightedSuggestion(-1);
+      return false;
+    }
+
+    return false
+  }
+
   return {
     filteredChampions,
     showSuggestions,
@@ -75,6 +115,7 @@ export function useChampionSuggestions(
     setShowSuggestions,
     setHighlightedSuggestion,
     handleChampionSelect,
+    keyDownFunc
   };
 }
 

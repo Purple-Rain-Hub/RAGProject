@@ -15,6 +15,7 @@ export default function Page() {
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
 
+  //hook per suggerimenti
   const {
     filteredChampions,
     showSuggestions,
@@ -22,6 +23,7 @@ export default function Page() {
     setShowSuggestions,
     setHighlightedSuggestion,
     handleChampionSelect,
+    keyDownFunc,
   } = useChampionSuggestions(
     { targetInput, champions, attempts, result },
     setTargetInput
@@ -98,39 +100,9 @@ export default function Page() {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowDown') {
-      if (showSuggestions && filteredChampions.length > 0) {
-        e.preventDefault();
-        const next = highlightedSuggestion < filteredChampions.length - 1 ? highlightedSuggestion + 1 : 0;
-        setHighlightedSuggestion(next);
-      }
-      return;
-    }
-
-    if (e.key === 'ArrowUp') {
-      if (showSuggestions && filteredChampions.length > 0) {
-        e.preventDefault();
-        const next = highlightedSuggestion > 0 ? highlightedSuggestion - 1 : filteredChampions.length - 1;
-        setHighlightedSuggestion(next);
-      }
-      return;
-    }
-
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (filteredChampions.length > 0 && showSuggestions) {
-        const suggestionToSelect = highlightedSuggestion >= 0 ? highlightedSuggestion : 0;
-        handleChampionSelect(filteredChampions[suggestionToSelect]);
-      } else {
-        handleSubmit();
-      }
-      return;
-    }
-
-    if (e.key === 'Escape') {
-      setShowSuggestions(false);
-      setHighlightedSuggestion(-1);
-      return;
+    const shouldSubmit = keyDownFunc(e)
+    if(shouldSubmit){
+      handleSubmit();
     }
   };
 
