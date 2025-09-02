@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useChampionSuggestions } from "./hooks/useChampionSuggestions";
 
 export default function Page() {
   const [targetInput, setTargetInput] = useState("");
@@ -9,12 +10,22 @@ export default function Page() {
   const [result, setResult] = useState<{ ranking: number, targetChamp: string } | undefined>(undefined);
   const [champions, setChampions] = useState<string[]>([]);
   const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingChampions, setLoadingChampions] = useState(true);
   const [attemptsCounter, setAttemptsCounter] = useState(0);
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
-  const [highlightedSuggestion, setHighlightedSuggestion] = useState<number>(-1);
+
+  const {
+    filteredChampions,
+    showSuggestions,
+    highlightedSuggestion,
+    setShowSuggestions,
+    setHighlightedSuggestion,
+    handleChampionSelect,
+  } = useChampionSuggestions(
+    { targetInput, champions, attempts, result },
+    setTargetInput
+  );
 
   // Load champions on component mount
   useEffect(() => {
@@ -37,42 +48,6 @@ export default function Page() {
     loadChampions();
   }, []);
 
-  //filtro champ tramite useMemo
-  const filteredChampions = useMemo(() => {
-    if (
-      targetInput.trim() === '' ||
-      champions.some(c => c.toLowerCase() === targetInput.toLowerCase())
-    ) {
-      return [];
-    }
-
-    return champions.filter(champion =>
-      champion.toLowerCase().startsWith(targetInput.toLowerCase()) &&
-      !attempts.some(a => a.targetChamp === champion) &&
-      result?.targetChamp != champion
-    );
-  }, [targetInput, champions, attempts, result]);
-
-  // Toggle suggestions visibility based on input and memoized filtered list
-  useEffect(() => {
-    if (
-      targetInput.trim() === '' ||
-      champions.some(c => c.toLowerCase() === targetInput.toLowerCase())
-    ) {
-      setShowSuggestions(false);
-      setHighlightedSuggestion(-1);
-      return;
-    }
-
-    setShowSuggestions(filteredChampions.length > 0);
-    setHighlightedSuggestion(-1);
-  }, [targetInput, champions, filteredChampions]);
-
-  const handleChampionSelect = (championName: string) => {
-    setTargetInput(championName);
-    setShowSuggestions(false);
-    setHighlightedSuggestion(-1);
-  };
 
   const handleSubmit = async () => {
     if(victory){
@@ -126,10 +101,8 @@ export default function Page() {
     if (e.key === 'ArrowDown') {
       if (showSuggestions && filteredChampions.length > 0) {
         e.preventDefault();
-        setHighlightedSuggestion(prev => {
-          const next = prev < filteredChampions.length - 1 ? prev + 1 : 0;
-          return next;
-        });
+        const next = highlightedSuggestion < filteredChampions.length - 1 ? highlightedSuggestion + 1 : 0;
+        setHighlightedSuggestion(next);
       }
       return;
     }
@@ -137,10 +110,8 @@ export default function Page() {
     if (e.key === 'ArrowUp') {
       if (showSuggestions && filteredChampions.length > 0) {
         e.preventDefault();
-        setHighlightedSuggestion(prev => {
-          const next = prev > 0 ? prev - 1 : filteredChampions.length - 1;
-          return next;
-        });
+        const next = highlightedSuggestion > 0 ? highlightedSuggestion - 1 : filteredChampions.length - 1;
+        setHighlightedSuggestion(next);
       }
       return;
     }
