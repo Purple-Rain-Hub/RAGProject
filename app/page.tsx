@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export default function Page() {
   const [targetInput, setTargetInput] = useState("");
@@ -8,11 +8,10 @@ export default function Page() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ ranking: number, targetChamp: string } | undefined>(undefined);
   const [champions, setChampions] = useState<string[]>([]);
-  const [filteredChampions, setFilteredChampions] = useState<string[]>([]);
+  const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingChampions, setLoadingChampions] = useState(true);
   const [attemptsCounter, setAttemptsCounter] = useState(0);
-  const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
   const [highlightedSuggestion, setHighlightedSuggestion] = useState<number>(-1);
@@ -38,22 +37,35 @@ export default function Page() {
     loadChampions();
   }, []);
 
-  // Filter champions based on input
+  const filteredChampions = useMemo(() => {
+    if (
+      targetInput.trim() === '' ||
+      champions.some(c => c.toLowerCase() === targetInput.toLowerCase())
+    ) {
+      return [];
+    }
+
+    return champions.filter(champion =>
+      champion.toLowerCase().startsWith(targetInput.toLowerCase()) &&
+      !attempts.some(a => a.targetChamp === champion) &&
+      result?.targetChamp != champion
+    );
+  }, [targetInput, champions, attempts, result]);
+
+  // Toggle suggestions visibility based on input and memoized filtered list
   useEffect(() => {
-    if (targetInput.trim() === '' || champions.some(c => c.toLowerCase() === targetInput.toLowerCase())) {
-      setFilteredChampions([]);
+    if (
+      targetInput.trim() === '' ||
+      champions.some(c => c.toLowerCase() === targetInput.toLowerCase())
+    ) {
       setShowSuggestions(false);
       setHighlightedSuggestion(-1);
       return;
     }
 
-    const filtered = champions.filter(champion =>
-      champion.toLowerCase().startsWith(targetInput.toLowerCase()) && !attempts.some(a=> a.targetChamp === champion) && result?.targetChamp != champion
-    );
-    setFilteredChampions(filtered);
-    setShowSuggestions(filtered.length > 0);
+    setShowSuggestions(filteredChampions.length > 0);
     setHighlightedSuggestion(-1);
-  }, [targetInput, champions]);
+  }, [targetInput, champions, filteredChampions]);
 
   const handleChampionSelect = (championName: string) => {
     setTargetInput(championName);
