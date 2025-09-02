@@ -37,6 +37,7 @@ export default function Page() {
     loadChampions();
   }, []);
 
+  //filtro champ tramite useMemo
   const filteredChampions = useMemo(() => {
     if (
       targetInput.trim() === '' ||
