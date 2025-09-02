@@ -6,13 +6,13 @@ export default function Page() {
   const [targetInput, setTargetInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ ranking: number, queryChamp: string, targetChamp: string } | undefined>(undefined);
+  const [result, setResult] = useState<{ ranking: number, targetChamp: string } | undefined>(undefined);
   const [champions, setChampions] = useState<string[]>([]);
   const [filteredChampions, setFilteredChampions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingChampions, setLoadingChampions] = useState(true);
   const [attemptsCounter, setAttemptsCounter] = useState(0);
-  const [attempts, setAttempts] = useState<{ ranking: number, queryChamp: string, targetChamp: string }[]>([])
+  const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
 

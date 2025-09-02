@@ -64,7 +64,7 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
         // Creare il query engine
         const totChamps = 159;
         const queryEngine = index.asQueryEngine({ similarityTopK: totChamps });
-        const { message, sourceNodes } = await queryEngine.query({ query: queryChamp.toLowerCase() });
+        const { sourceNodes } = await queryEngine.query({ query: queryChamp.toLowerCase() });
 
         //console.log(message.content);
 
@@ -79,7 +79,6 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
             if (metadataName.toLowerCase() === targetChamp.toLowerCase()) {
                 const ranking = {
                     ranking: i,
-                    queryChamp: queryChamp,
                     targetChamp: targetChamp
                 };
                 return ranking;

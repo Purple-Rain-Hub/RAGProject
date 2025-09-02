@@ -17,7 +17,17 @@ export async function GET(request: Request) {
             return Response.json({ error: "Target champion not found" }, { status: 400 });
         }
 
-        const ranking = await rankingFromQuery("Lux", targetInput);
+        // Pick a deterministic "random" champion per day from the available names
+        const today = new Date();
+        const seedString = `${today.getUTCFullYear()}-${today.getUTCMonth() + 1}-${today.getUTCDate()}`;
+        let hash = 0;
+        for (let i = 0; i < seedString.length; i++) {
+            hash = (hash * 31 + seedString.charCodeAt(i)) >>> 0;
+        }
+        const dailyIndex = hash % championNames.length;
+        const dailyQueryChampion = championNames[dailyIndex];
+
+        const ranking = await rankingFromQuery(dailyQueryChampion, targetInput);
         if (!ranking) {
             throw new Error("Ranking not found");
         }
