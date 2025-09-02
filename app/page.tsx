@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useChampionSuggestions } from "./hooks/useChampionSuggestions";
+import Header from "./components/Header";
+import GameStats from "./components/GameStats";
+import ErrorAlert from "./components/ErrorAlert";
+import LoadingAnalysis from "./components/LoadingAnalysis";
+import ResultCard from "./components/ResultCard";
+import AttemptsList from "./components/AttemptsList";
+import Footer from "./components/Footer";
 
 export default function Page() {
   const [targetInput, setTargetInput] = useState("");
@@ -124,7 +131,7 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       {/* Header with themed styling */}
       <div className="relative overflow-y-auto min-h-screen">
-        {/* Background pattern */}
+        {/* Background pattern (puntini sullo sfondo) */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
           <div className="absolute inset-0" style={{
@@ -134,27 +141,9 @@ export default function Page() {
         </div>
 
         <div className="relative z-10 min-h-screen flex flex-col justify-center p-4 md:p-8">
-          {/* Game Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent float-animation">
-              🏆 Campione Misterioso 🏆
-            </h1>
-            <div className="w-32 h-1 bg-gradient-to-r from-yellow-400 to-red-500 mx-auto mb-4"></div>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Indovina il campione nascosto! Ogni tentativo ti rivelerà quanto sei vicino alla risposta corretta,
-              ma dovrai usare le tue conoscenze sui campioni di League of Legends per scoprire chi si nasconde nell'ombra.
-            </p>
-          </div>
+          <Header />
 
-          {/* Game Stats */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/30">
-              <div className="text-center">
-                <p className="text-yellow-400 font-semibold">Tentativi: <span className="text-white">{attemptsCounter}</span></p>
-                <p className="text-gray-400 text-sm">Tentativi illimitati</p>
-              </div>
-            </div>
-          </div>
+          <GameStats attemptsCounter={attemptsCounter} />
 
           {/* Game Interface */}
           <div className="max-w-2xl mx-auto">
@@ -221,92 +210,25 @@ export default function Page() {
                 className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? (
-                  <div className="flex items-center justify-center">
-                    Analizzando...
-                  </div>
+                  <div className="flex items-center justify-center">Analizzando...</div>
                 ) : (
                   "🔍 Analizza Campione"
                 )}
               </button>
             </div>
 
-            {error && (
-              <div className="mt-6 bg-red-900/40 rounded-lg p-6 border border-red-500/30">
-                <h3 className="text-lg font-semibold text-red-400 mb-2 flex items-center">
-                  <span className="mr-2">❌</span>
-                  Errore
-                </h3>
-                <p className="text-red-300">{error}</p>
-              </div>
-            )}
+            <ErrorAlert error={error} />
 
             {/* Results Section */}
-            {loading && (
-              <div className="mt-6 bg-black/40 rounded-lg p-6 border border-blue-500/30">
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mr-3"></div>
-                  <h3 className="text-lg font-semibold text-blue-300">Analizzando il campione...</h3>
-                </div>
-                <p className="text-gray-400 text-center mt-2">Calcolando la distanza dal campione misterioso...</p>
-              </div>
-            )}
+            <LoadingAnalysis show={loading} />
 
-            {result && (
-              <div className="mt-6 bg-black/40 rounded-lg p-6 border border-yellow-500/30">
-                <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center">
-                  <span className="mr-2">🎯</span>
-                  Risultato del Tentativo
-                </h3>
-                <div className="space-y-3">
-                  <p className="text-gray-300">
-                    <span className="text-blue-300">Campione analizzato:</span>{" "}
-                    <span className="text-white font-semibold">{result.targetChamp}</span>
-                  </p>
-                  <p className="text-gray-300">
-                    <span className="text-blue-300">Distanza dal misterioso:</span>{" "}
-                    <span className={`font-bold text-lg ${getDistanceColor(result.ranking)}`}>
-                      {result.ranking}
-                    </span>
-                  </p>
-                  <div className="mt-4 p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/30">
-                    <p className={`text-center font-semibold ${getDistanceColor(result.ranking)}`}>
-                      {getDistanceMessage(result.ranking)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ResultCard result={result} getDistanceColor={getDistanceColor} getDistanceMessage={getDistanceMessage} />
 
-            {attempts && attempts.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center">
-                  <span className="mr-2">📋</span>
-                  Tentativi Precedenti
-                </h3>
-                <div className="space-y-3">
-                  {attempts.map((attempt, index) => (
-                    <div key={index} className="bg-black/30 rounded-lg p-4 border border-blue-500/20 hover:border-blue-500/40 transition-colors duration-200">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white font-semibold">{attempt.targetChamp}</span>
-                        <span className={`text-sm font-bold px-3 py-1 rounded ${getDistanceColor(attempt.ranking)}`}>
-                          {attempt.ranking}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <AttemptsList attempts={attempts} getDistanceColor={getDistanceColor} />
 
           </div>
 
-          {/* Footer */}
-          <div className="text-center mt-12 text-gray-400">
-            <p className="text-sm">
-              💡 Suggerimento: Usa le informazioni sui campioni come razza, sesso, tipo di danno,
-              ruolo e regione per indovinare il campione misterioso!
-            </p>
-          </div>
+          <Footer />
         </div>
       </div>
     </main>
