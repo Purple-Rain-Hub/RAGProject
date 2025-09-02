@@ -15,6 +15,7 @@ export default function Page() {
   const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
+  const [highlightedSuggestion, setHighlightedSuggestion] = useState<number>(-1);
 
   // Load champions on component mount
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function Page() {
     if (targetInput.trim() === '' || champions.some(c => c.toLowerCase() === targetInput.toLowerCase())) {
       setFilteredChampions([]);
       setShowSuggestions(false);
+      setHighlightedSuggestion(-1);
       return;
     }
 
@@ -50,11 +52,13 @@ export default function Page() {
     );
     setFilteredChampions(filtered);
     setShowSuggestions(filtered.length > 0);
+    setHighlightedSuggestion(-1);
   }, [targetInput, champions]);
 
   const handleChampionSelect = (championName: string) => {
     setTargetInput(championName);
     setShowSuggestions(false);
+    setHighlightedSuggestion(-1);
   };
 
   const handleSubmit = async () => {
@@ -106,15 +110,43 @@ export default function Page() {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      if (showSuggestions && filteredChampions.length > 0) {
+        e.preventDefault();
+        setHighlightedSuggestion(prev => {
+          const next = prev < filteredChampions.length - 1 ? prev + 1 : 0;
+          return next;
+        });
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      if (showSuggestions && filteredChampions.length > 0) {
+        e.preventDefault();
+        setHighlightedSuggestion(prev => {
+          const next = prev > 0 ? prev - 1 : filteredChampions.length - 1;
+          return next;
+        });
+      }
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       if (filteredChampions.length > 0 && showSuggestions) {
-        handleChampionSelect(filteredChampions[0]);
+        const suggestionToSelect = highlightedSuggestion >= 0 ? highlightedSuggestion : 0;
+        handleChampionSelect(filteredChampions[suggestionToSelect]);
       } else {
         handleSubmit();
       }
-    } else if (e.key === 'Escape') {
+      return;
+    }
+
+    if (e.key === 'Escape') {
       setShowSuggestions(false);
+      setHighlightedSuggestion(-1);
+      return;
     }
   };
 
@@ -198,10 +230,10 @@ export default function Page() {
                 {/* Champion suggestions dropdown */}
                 {showSuggestions && filteredChampions.length > 0 && (
                   <div className="absolute z-20 w-full mt-2 bg-black/90 border border-blue-500/50 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
-                    {filteredChampions.map((champion, index) => (
+                    {filteredChampions.map((champion, suggestionIndex) => (
                       <div
-                        key={index}
-                        className="px-4 py-3 hover:bg-blue-500/20 cursor-pointer border-b border-blue-500/20 last:border-b-0 transition-colors duration-150"
+                        key={suggestionIndex}
+                        className={`px-4 py-3 cursor-pointer border-b border-blue-500/20 last:border-b-0 transition-colors duration-150 ${suggestionIndex === highlightedSuggestion ? 'bg-blue-500/30' : 'hover:bg-blue-500/20'}`}
                         onClick={() => handleChampionSelect(champion)}
                       >
                         <span className="text-white">{champion}</span>
