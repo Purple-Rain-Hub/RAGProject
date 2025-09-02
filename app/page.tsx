@@ -85,7 +85,7 @@ export default function Page() {
       setResult(undefined);
 
       setAttemptsCounter(prev => prev + 1);
-      const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`);
+      const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`); //encodeURIComponent trasforma la stringa in un formato adatto agli url
       if (!response.ok) {
         throw new Error("Errore nella fetch del ranking");
       }
