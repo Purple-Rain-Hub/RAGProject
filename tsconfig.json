@@ -13,9 +13,6 @@
     "composite": true,
     "jsx": "preserve",
     "allowJs": true,
-    "types": [
-      "node"
-    ],
     "lib": [
       "dom",
       "dom.iterable",
