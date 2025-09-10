@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { gemini, GeminiEmbedding, GEMINI_MODEL } from "@llamaindex/google";
+import { gemini, GEMINI_MODEL } from "@llamaindex/google";
+import { OpenAIEmbedding } from "@llamaindex/openai";
 import {
     Settings,
     VectorStoreIndex,
@@ -16,7 +17,10 @@ Settings.llm = gemini({
     apiKey: process.env.GOOGLE_API_KEY!,
     model: GEMINI_MODEL.GEMINI_2_0_FLASH,
 });
-Settings.embedModel = new GeminiEmbedding();
+Settings.embedModel = new OpenAIEmbedding({
+    apiKey: process.env.OPENAI_API_KEY!,
+    model: "text-embedding-3-small",
+});
 
 export async function loadIndex() {
     try {
