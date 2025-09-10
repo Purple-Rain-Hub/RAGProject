@@ -24,7 +24,63 @@ Settings.embedModel = new OpenAIEmbedding({
     model: "text-embedding-3-small",
 });
 
+async function checkLocalStores(): Promise<string | null> {
+    const tmpDir = path.join(os.tmpdir(), "lol-index");
+    
+    try {
+        console.log("Controllo se esistono già i file nella directory temporanea...");
+        
+        const docStorePath = path.join(tmpDir, "doc_store.json");
+        const indexStorePath = path.join(tmpDir, "index_store.json");
+        const vectorStorePath = path.join(tmpDir, "vector_store.json");
+        
+        // Verifica se tutti i file esistono
+        const [docExists, indexExists, vectorExists] = await Promise.all([
+            fs.access(docStorePath).then(() => true).catch(() => false),
+            fs.access(indexStorePath).then(() => true).catch(() => false),
+            fs.access(vectorStorePath).then(() => true).catch(() => false)
+        ]);
+        
+        if (docExists && indexExists && vectorExists) {
+            console.log("File trovati nella directory temporanea, verifico la validità...");
+            
+            // Verifica che i file siano validi JSON
+            try {
+                const [docContent, indexContent, vectorContent] = await Promise.all([
+                    fs.readFile(docStorePath, "utf8"),
+                    fs.readFile(indexStorePath, "utf8"),
+                    fs.readFile(vectorStorePath, "utf8")
+                ]);
+                
+                // Validazione JSON
+                JSON.parse(docContent);
+                JSON.parse(indexContent);
+                JSON.parse(vectorContent);
+                
+                console.log("File esistenti nella directory temporanea sono validi, li utilizzo");
+                return tmpDir;
+            } catch (jsonError) {
+                console.log("File esistenti non sono validi, procedo con il download dal blob...");
+                // Rimuovi i file corrotti
+                await fs.rm(tmpDir, { recursive: true, force: true });
+            }
+        } else {
+            console.log("File non trovati nella directory temporanea, procedo con il download dal blob...");
+        }
+    } catch (error) {
+        console.log("Errore durante il controllo dei file locali:", error);
+    }
+    
+    return null;
+}
+
 async function downloadBlobStoresToDir(): Promise<string | null> {
+    // Prima controlla se esistono già i file locali
+    const localDir = await checkLocalStores();
+    if (localDir) {
+        return localDir;
+    }
+    
     try {
         console.log("Controllo la disponibilità dei blob...");
         const { blobs } = await list({ prefix: "lolChampsEmbeddings/" });
