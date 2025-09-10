@@ -226,4 +226,4 @@ export async function rankingFromQuery(queryChamp: string, targetChamp: string) 
 
 }
 
-rankingFromQuery("Lux", "LeBlanc").catch(console.error);
+//rankingFromQuery("Lux", "LeBlanc").catch(console.error);
