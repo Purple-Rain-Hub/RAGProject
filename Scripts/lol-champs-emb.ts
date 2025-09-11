@@ -1,7 +1,5 @@
 import "dotenv/config";
-import fs from "node:fs/promises";
-import path from "node:path";
-import os from "node:os";
+// no local temp files needed
 
 import { gemini, GEMINI_MODEL } from "@llamaindex/google";
 import { OpenAIEmbedding } from "@llamaindex/openai";
@@ -13,6 +11,7 @@ import {
     VectorStoreIndex,
     storageContextFromDefaults,
 } from "llamaindex";
+import { SimpleDocumentStore, SimpleIndexStore } from "llamaindex/storage";
 
 import { CHAMPIONS, type Champion } from "./lol-champs";
 import { put } from "@vercel/blob";
@@ -49,44 +48,38 @@ export async function lolChampsEmb() {
 
     console.log(`Processando ${documents.length} campioni...`)
 
-    // Crea una cartella temporanea per il salvataggio
-    const tmpDir = path.join(os.tmpdir(), "lol-embeddings");
-    await fs.mkdir(tmpDir, { recursive: true });
-
-    // Crea il storage context con persistDir per salvare in locale
-    const storageContext = await storageContextFromDefaults({ persistDir: tmpDir });
+    // Crea il storage context in memoria (senza persistDir)
+    const storageContext = await storageContextFromDefaults({});
 
     // Crea l'indice vettoriale con gli embeddings
-    const index = await VectorStoreIndex.fromDocuments(documents, {
-        storageContext,
-    });
+    const index = await VectorStoreIndex.fromDocuments(documents, { storageContext });
 
-    console.log("Indice creato, ora salvo i file temporanei...");
+    console.log("Indice creato, ora serializzo gli store in memoria...");
 
-    // Leggi i file generati dalla cartella temporanea
-    const [docStoreData, indexStoreData, vectorStoreData] = await Promise.all([
-        fs.readFile(path.join(tmpDir, "doc_store.json"), "utf8"),
-        fs.readFile(path.join(tmpDir, "index_store.json"), "utf8"),
-        fs.readFile(path.join(tmpDir, "vector_store.json"), "utf8"),
-    ]);
+    // Serializza gli store in memoria in JSON
+    const docStoreJson = JSON.stringify((storageContext.docStore as unknown as SimpleDocumentStore).toDict());
+    const indexStoreJson = JSON.stringify((storageContext.indexStore as unknown as SimpleIndexStore).toDict());
+    const vectorStores = storageContext.vectorStores as Record<string, any>;
+    const firstVectorStore = Object.values(vectorStores)[0] as { toDict: () => unknown };
+    const vectorStoreJson = JSON.stringify(firstVectorStore.toDict());
 
-    // Carica i file sul blob di Vercel
+    // Carica i JSON direttamente sul blob di Vercel
     const [docBlob, indexBlob, vectorBlob] = await Promise.all([
-        put("lolChampsEmbeddings/doc_store.json", docStoreData, {
+        put("lolChampsEmbeddings/doc_store.json", docStoreJson, {
             access: "public",
             contentType: "application/json",
-            allowOverwrite: true
+            allowOverwrite: true,
         }),
-        put("lolChampsEmbeddings/index_store.json", indexStoreData, {
+        put("lolChampsEmbeddings/index_store.json", indexStoreJson, {
             access: "public",
             contentType: "application/json",
-            allowOverwrite: true
+            allowOverwrite: true,
         }),
-        put("lolChampsEmbeddings/vector_store.json", vectorStoreData, {
+        put("lolChampsEmbeddings/vector_store.json", vectorStoreJson, {
             access: "public",
             contentType: "application/json",
-            allowOverwrite: true
-        })
+            allowOverwrite: true,
+        }),
     ]);
 
     if(!docBlob || !indexBlob || !vectorBlob){
@@ -98,10 +91,9 @@ export async function lolChampsEmb() {
     console.log("- index_store:", indexBlob.url);
     console.log("- vector_store:", vectorBlob.url);
 
-    // Pulisci la cartella temporanea
-    await fs.rm(tmpDir, { recursive: true, force: true });
-
-    console.log("Indice vettoriale salvato sul blob di Vercel e cartella temporanea pulita");
+    console.log("Indice vettoriale salvato sul blob di Vercel");
 
     return index;
 }
+
+lolChampsEmb().catch(console.error);
