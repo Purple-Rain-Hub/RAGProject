@@ -21,6 +21,9 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minuti di cache
 let cachedNodes: NodeWithScore<Metadata>[] | null = null;
 let cachedQueryChamp: string | null = null;
 
+// Flag per prevenire inizializzazioni multiple
+let isInitializingCache = false;
+
 // Configurazione LLM e modello di embedding
 Settings.llm = gemini({
     apiKey: process.env.GOOGLE_API_KEY!,
@@ -132,6 +135,16 @@ export async function cacheFromQuery(queryChamp: string) {
 }
 
 export async function initializeCache(queryChamp: string) {
+    // Se già in inizializzazione, aspetta che finisca
+    if (isInitializingCache) {
+        console.log("Cache già in inizializzazione, aspetto...");
+        while (isInitializingCache) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return;
+    }
+    
+    isInitializingCache = true;
     try {
         console.log("Inizializzazione cache per", queryChamp);
         await cacheFromQuery(queryChamp);
@@ -139,6 +152,8 @@ export async function initializeCache(queryChamp: string) {
     } catch (error) {
         console.error("Errore durante l'inizializzazione della cache:", error);
         throw error;
+    } finally {
+        isInitializingCache = false;
     }
 }
 
@@ -149,7 +164,7 @@ export async function rankingFromCache(queryChamp: string, targetChamp: string) 
             console.log("Cache non valida - aggiorno cache...");
             console.log(cachedQueryChamp, queryChamp);
             
-            await cacheFromQuery(queryChamp);
+            await initializeCache(queryChamp);
         }
 
         if (!cachedNodes) {
