@@ -11,6 +11,11 @@ import {
 import { PatchedUpstashVectorStore } from "./PatchedUpstashVectorStore";
 import { lolChampsEmb } from "./lol-champs-emb";
 
+// Cache per l'indice vettoriale
+let cachedIndex: VectorStoreIndex | null = null;
+let lastCacheTime = 0;
+const CACHE_DURATION = 10 * 60 * 1000; // 5 minuti di cache
+
 // Configurazione LLM e modello di embedding
 Settings.llm = gemini({
     apiKey: process.env.GOOGLE_API_KEY!,
@@ -22,6 +27,14 @@ Settings.embedModel = new OpenAIEmbedding({
 });
 
 export async function loadIndex() {
+    const now = Date.now();
+    
+    // Se abbiamo un indice cached e non è scaduto, usalo
+    if (cachedIndex && (now - lastCacheTime) < CACHE_DURATION) {
+        console.log("🚀 Usando indice cached - molto più veloce!");
+        return cachedIndex;
+    }
+    
     try {
         console.log("Carico l'indice da Upstash Vector...");
 
@@ -41,6 +54,11 @@ export async function loadIndex() {
         
         if (testResult.sourceNodes && testResult.sourceNodes.length > 0) {
             console.log("Indice caricato da Upstash Vector!");
+            
+            // Cache l'indice
+            cachedIndex = index;
+            lastCacheTime = now;
+            
             return index;
         } else {
             console.log("Indice vuoto trovato su Upstash Vector. Ricreo l'indice...");
@@ -52,6 +70,11 @@ export async function loadIndex() {
             // Ricarica l'indice dal vector store per assicurarsi che sia sincronizzato
             const reloadedIndex = await VectorStoreIndex.fromVectorStore(vectorStore);
             console.log("Indice ricaricato da Upstash Vector!");
+            
+            // Cache l'indice ricaricato
+            cachedIndex = reloadedIndex;
+            lastCacheTime = now;
+            
             return reloadedIndex;
         }
 
