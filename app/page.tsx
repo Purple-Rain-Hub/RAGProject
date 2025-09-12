@@ -36,16 +36,27 @@ export default function Page() {
     setTargetInput
   );
 
-  // Load champions on component mount
+  // Load champions and initialize cache on component mount
   useEffect(() => {
-    const loadChampions = async () => {
+    const initializeApp = async () => {
       try {
-        const response = await fetch('/api/champions');
-        if (!response.ok) {
+        // Load champions
+        const championsResponse = await fetch('/api/champions');
+        if (!championsResponse.ok) {
           throw new Error('Failed to load champions');
         }
-        const data = await response.json();
-        setChampions(data.champions);
+        const championsData = await championsResponse.json();
+        setChampions(championsData.champions);
+        
+        // Initialize cache in the background
+        try {
+          await fetch('/api/init-cache', { method: 'POST' });
+          console.log('Cache inizializzata con successo');
+        } catch (cacheError) {
+          console.warn('Errore durante l\'inizializzazione della cache:', cacheError);
+          // Non bloccare l'app se la cache non si inizializza
+        }
+        
         setLoadingChampions(false);
       } catch (error) {
         console.error('Error loading champions:', error);
@@ -54,7 +65,7 @@ export default function Page() {
       }
     };
 
-    loadChampions();
+    initializeApp();
   }, []);
 
 
