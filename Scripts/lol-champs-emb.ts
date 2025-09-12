@@ -16,7 +16,7 @@ Settings.llm = gemini({
     apiKey: process.env.GOOGLE_API_KEY!,
     model: GEMINI_MODEL.GEMINI_2_0_FLASH,
 });
-const embedding = Settings.embedModel = new OpenAIEmbedding({
+Settings.embedModel = new OpenAIEmbedding({
     apiKey: process.env.OPENAI_API_KEY!,
     model: "text-embedding-3-small",
 });
