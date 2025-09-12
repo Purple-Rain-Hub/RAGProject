@@ -18,6 +18,8 @@ export default function Page() {
   const [champions, setChampions] = useState<string[]>([]);
   const [attempts, setAttempts] = useState<{ ranking: number, targetChamp: string }[]>([])
   const [loadingChampions, setLoadingChampions] = useState(true);
+  const [initializingCache, setInitializingCache] = useState(false);
+  const [cacheError, setCacheError] = useState("");
   const [attemptsCounter, setAttemptsCounter] = useState(0);
   const [invalidAttempt, setInvalidAttempt] = useState(false)
   const [victory, setVictory] = useState(false);
@@ -49,12 +51,19 @@ export default function Page() {
         setChampions(championsData.champions);
         
         // Initialize cache in the background
+        setInitializingCache(true);
+        setCacheError("");
         try {
-          await fetch('/api/init-cache', { method: 'POST' });
+          const cacheResponse = await fetch('/api/ranking', { method: 'POST' });
+          if (!cacheResponse.ok) {
+            throw new Error('Cache initialization failed');
+          }
           console.log('Cache inizializzata con successo');
         } catch (cacheError) {
           console.warn('Errore durante l\'inizializzazione della cache:', cacheError);
-          // Non bloccare l'app se la cache non si inizializza
+          setCacheError('Sistema di analisi non completamente pronto - alcune funzionalità potrebbero essere più lente');
+        } finally {
+          setInitializingCache(false);
         }
         
         setLoadingChampions(false);
@@ -96,7 +105,7 @@ export default function Page() {
       setResult(undefined);
 
       setAttemptsCounter(prev => prev + 1);
-      const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`); //encodeURIComponent trasforma la stringa in un formato adatto agli url
+      const response = await fetch(`/api/ranking?targetInput=${encodeURIComponent(targetInput)}`, { method: 'GET' }); //encodeURIComponent trasforma la stringa in un formato adatto agli url
       if (!response.ok) {
         throw new Error("Errore nella fetch del ranking");
       }
@@ -171,12 +180,12 @@ export default function Page() {
                   onFocus={() => targetInput && setShowSuggestions(true)}
                   placeholder="Es: Vex, Yasuo, Ahri..."
                   className="w-full rounded-lg border-2 border-blue-500/50 bg-black/50 px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all duration-200"
-                  disabled={loadingChampions}
+                  disabled={loadingChampions || initializingCache}
                   autoComplete="off"
                 />
 
-                {/* Loading indicator for champions */}
-                {loadingChampions && (
+                {/* Loading indicator for champions and cache */}
+                {(loadingChampions || initializingCache) && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-blue-300">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300"></div>
                   </div>
@@ -216,7 +225,7 @@ export default function Page() {
 
               <button
                 onClick={handleSubmit}
-                disabled={loading || loadingChampions || !champions.some(c => c.toLowerCase() === targetInput.toLowerCase()) || victory}
+                disabled={loading || loadingChampions || initializingCache || !champions.some(c => c.toLowerCase() === targetInput.toLowerCase()) || victory}
                 className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? (
@@ -228,6 +237,29 @@ export default function Page() {
             </div>
 
             <ErrorAlert error={error} />
+
+            {/* Cache initialization loading */}
+            {initializingCache && (
+              <div className="mt-4 p-4 bg-blue-900/30 border border-blue-500/50 rounded-lg">
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-300"></div>
+                  <span className="text-blue-300 font-medium">Inizializzazione sistema di analisi...</span>
+                </div>
+                <p className="text-gray-400 text-sm text-center mt-2">
+                  Questo processo potrebbe richiedere alcuni secondi per la prima volta
+                </p>
+              </div>
+            )}
+
+            {/* Cache error warning */}
+            {cacheError && (
+              <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <span className="text-yellow-400">⚠️</span>
+                  <span className="text-yellow-300 text-sm">{cacheError}</span>
+                </div>
+              </div>
+            )}
 
             {/* Results Section */}
             <LoadingAnalysis show={loading} />

@@ -94,7 +94,7 @@ export async function cacheFromQuery(queryChamp: string) {
 
     // Se abbiamo i nodes cached per lo stesso queryChamp e non sono scaduti, fermiamo la funzione
     if (cachedNodes && cachedQueryChamp === queryChamp && (now - lastCacheTime) < CACHE_DURATION) {
-        console.log("Usando cache esistente per", queryChamp, "- molto più veloce!");
+        console.log("Usando cache esistente per", queryChamp);
         return;
     }
     
@@ -105,7 +105,7 @@ export async function cacheFromQuery(queryChamp: string) {
             throw new Error("Index non definito");
         }
 
-        console.log("Calcolo Query per", queryChamp, "...");
+        console.log("Calcolo Query per ", queryChamp);
 
         // Creare il query engine
         const totChamps = 159;
@@ -121,7 +121,9 @@ export async function cacheFromQuery(queryChamp: string) {
         cachedQueryChamp = queryChamp;
         lastCacheTime = now;
 
-        console.log("Cache aggiornata per", queryChamp);
+        console.log("Cache aggiornata");
+        console.log(cachedQueryChamp);
+        
 
     } catch (error) {
         console.error("Errore durante la cache della query: ");
@@ -144,7 +146,9 @@ export async function rankingFromCache(queryChamp: string, targetChamp: string) 
     try {
         // Verifica se la cache è valida per il queryChamp corrente
         if (!cachedNodes || cachedQueryChamp !== queryChamp) {
-            console.log("Cache non valida per", queryChamp, "- aggiorno cache...");
+            console.log("Cache non valida - aggiorno cache...");
+            console.log(cachedQueryChamp, queryChamp);
+            
             await cacheFromQuery(queryChamp);
         }
 
