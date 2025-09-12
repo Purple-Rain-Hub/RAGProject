@@ -1,4 +1,4 @@
-import { rankingFromQuery } from "../../../Scripts/lol-champs-query";
+import { rankingFromCache } from "../../../Scripts/lol-champs-query";
 import { CHAMPIONS } from "../../../Scripts/lol-champs";
 
 const CHAMPION_NAMES = CHAMPIONS.map(champion => champion.name);
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
         console.log(dailyQueryChampion);
         
 
-        const ranking = await rankingFromQuery(dailyQueryChampion, targetInput);
+        const ranking = await rankingFromCache(dailyQueryChampion, targetInput);
         if (!ranking) {
             throw new Error("Ranking not found");
         }
